@@ -23,6 +23,6 @@
 
 <script>
 export default {
-  props: ['pendingOrder']
-}
+  props: ["pendingOrder"],
+};
 </script>

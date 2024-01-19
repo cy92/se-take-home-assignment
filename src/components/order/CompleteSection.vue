@@ -21,6 +21,6 @@
 
 <script>
 export default {
-  props: ['completeOrder']
-}
+  props: ["completeOrder"],
+};
 </script>

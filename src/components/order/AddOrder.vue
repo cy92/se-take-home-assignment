@@ -3,7 +3,11 @@
     <v-card-title> New Order</v-card-title>
     <v-divider></v-divider>
     <v-form class="px-3" ref="form">
-      <v-text-field label="Order No" v-model="formData.orderNo" disabled></v-text-field>
+      <v-text-field
+        label="Order No"
+        v-model="formData.orderNo"
+        disabled
+      ></v-text-field>
       <v-select
         label="Order Type"
         :items="orderTypeList"
@@ -25,46 +29,46 @@
 </template>
 
 <script>
-import OrderType from '../../enum/OrderType.enum'
-import OrderStatus from '../../enum/OrderStatus.enum'
+import OrderType from "../../enum/OrderType.enum";
+import OrderStatus from "../../enum/OrderStatus.enum";
 
 export default {
-  props: ['addOrder', 'selectType'],
+  props: ["addOrder", "selectType"],
   data() {
     return {
       orderTypeList: [OrderType.normal, OrderType.vip],
-      orderItemList: ['Food1', 'Food2', 'Food3', 'Food4', 'Food5', 'Food6'],
+      orderItemList: ["Food1", "Food2", "Food3", "Food4", "Food5", "Food6"],
       rules: {
-        type: [(v) => !!v.trim() || 'Order type is required'],
-        item: [(v) => !!v.trim() || 'Order item is required']
+        type: [(v) => !!v.trim() || "Order type is required"],
+        item: [(v) => !!v.trim() || "Order item is required"],
       },
       formData: {
         orderNo: null,
-        orderType: '',
-        orderItems: ''
-      }
-    }
+        orderType: "",
+        orderItems: "",
+      },
+    };
   },
   methods: {
     // Generate order no. from current timestamp
     generateOrderNo() {
-      const date = Date.now()
-      return date.toString().slice(-8)
+      const date = Date.now();
+      return date.toString().slice(-8);
     },
     async formAddOrder() {
-      const { valid } = await this.$refs.form.validate()
-      if (!valid) return
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
       const addData = {
         ...this.formData,
-        orderStatus: OrderStatus.pending
-      }
-      this.addOrder(addData)
-    }
+        orderStatus: OrderStatus.pending,
+      };
+      this.addOrder(addData);
+    },
   },
   mounted() {
-    this.formData.orderItems = ''
-    this.formData.orderType = this.selectType
-    this.formData.orderNo = this.generateOrderNo()
-  }
-}
+    this.formData.orderItems = "";
+    this.formData.orderType = this.selectType;
+    this.formData.orderNo = this.generateOrderNo();
+  },
+};
 </script>

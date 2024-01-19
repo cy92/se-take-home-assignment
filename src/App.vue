@@ -11,7 +11,11 @@
               <v-card-text>
                 <v-row>
                   <v-col col="12">
-                    <v-btn color="primary" block @click="openAddDialog('Normal')">
+                    <v-btn
+                      color="primary"
+                      block
+                      @click="openAddDialog('Normal')"
+                    >
                       New Normal Order
                     </v-btn>
                   </v-col>
@@ -72,22 +76,22 @@
 </template>
 
 <script>
-import AddOrder from './components/order/AddOrder.vue'
-import PendingSection from './components/order/PendingSection.vue'
-import CompleteSection from './components/order/CompleteSection.vue'
+import AddOrder from "./components/order/AddOrder.vue";
+import PendingSection from "./components/order/PendingSection.vue";
+import CompleteSection from "./components/order/CompleteSection.vue";
 
-import OrderStatus from './enum/OrderStatus.enum'
-import OrderType from './enum/OrderType.enum'
+import OrderStatus from "./enum/OrderStatus.enum";
+import OrderType from "./enum/OrderType.enum";
 
 export default {
   components: {
     AddOrder,
     PendingSection,
-    CompleteSection
+    CompleteSection,
   },
   data() {
     return {
-      tab: 'pendingTab',
+      tab: "pendingTab",
       pendingOrder: [],
       completeOrder: [],
       processingBot: [],
@@ -95,106 +99,120 @@ export default {
       maxBot: 5,
       showAddDialog: false,
       processTime: 10000,
-      selectType: ''
-    }
+      selectType: "",
+    };
   },
   computed: {
     getPendingOrder() {
-      return this.pendingOrder.filter((ele) => ele.orderStatus === OrderStatus.pending).length
+      return this.pendingOrder.filter(
+        (ele) => ele.orderStatus === OrderStatus.pending
+      ).length;
     },
     checkAvailableBot() {
-      return this.botCount > 0 && this.processingBot.length < this.botCount
+      return this.botCount > 0 && this.processingBot.length < this.botCount;
     },
     checkMaxBot() {
-      return this.botCount === this.maxBot
+      return this.botCount === this.maxBot;
     },
     checkMinBot() {
-      return this.botCount === 0
-    }
+      return this.botCount === 0;
+    },
   },
   methods: {
     openAddDialog(type) {
-      this.selectType = type
-      this.showAddDialog = true
+      this.selectType = type;
+      this.showAddDialog = true;
     },
     addOrder(formData) {
-      this.pendingOrder.push(formData)
-      this.showAddDialog = false
-      this.sortPendingOrder()
+      this.pendingOrder.push(formData);
+      this.showAddDialog = false;
+      this.sortPendingOrder();
       if (this.checkAvailableBot) {
-        this.botProcess()
+        this.botProcess();
       }
     },
     addBot() {
-      if (this.checkMaxBot) return
-      this.botCount++
+      if (this.checkMaxBot) return;
+      this.botCount++;
 
       if (this.checkAvailableBot && this.getPendingOrder > 0) {
-        this.botProcess()
+        this.botProcess();
       }
     },
     removeBot() {
-      if (this.checkMinBot) return
+      if (this.checkMinBot) return;
 
       if (this.processingBot.length === this.botCount) {
-        this.botRemoveProcess()
+        this.botRemoveProcess();
       }
 
-      this.botCount--
+      this.botCount--;
     },
     // bot main process function
     botProcess() {
       // check if have pending vip
       const findPendingVIP = this.pendingOrder.find(
-        (ele) => ele.orderType === OrderType.vip && ele.orderStatus === OrderStatus.pending
-      )
+        (ele) =>
+          ele.orderType === OrderType.vip &&
+          ele.orderStatus === OrderStatus.pending
+      );
 
-      const toProcessType = findPendingVIP ? OrderType.vip : OrderType.normal
+      const toProcessType = findPendingVIP ? OrderType.vip : OrderType.normal;
 
       const thisOrder = this.pendingOrder.find(
-        (ele) => ele.orderStatus === OrderStatus.pending && ele.orderType === toProcessType
-      )
+        (ele) =>
+          ele.orderStatus === OrderStatus.pending &&
+          ele.orderType === toProcessType
+      );
 
-      thisOrder.orderStatus = OrderStatus.processing
+      thisOrder.orderStatus = OrderStatus.processing;
 
       // Set time out to move order to complete
       thisOrder.timer = setTimeout(() => {
-        this.botDone(thisOrder.orderNo)
-      }, this.processTime)
+        this.botDone(thisOrder.orderNo);
+      }, this.processTime);
 
       // Add record to processing bot for checking
-      this.processingBot.push(thisOrder)
+      this.processingBot.push(thisOrder);
 
       // Sort pending order list
-      this.sortPendingOrder()
+      this.sortPendingOrder();
     },
     // Complete bot process
     botDone(orderNo) {
       // Get current order location
-      const findIndex = this.pendingOrder.findIndex((ele) => ele.orderNo === orderNo)
+      const findIndex = this.pendingOrder.findIndex(
+        (ele) => ele.orderNo === orderNo
+      );
       // Get and remove current order from pending list
-      const order = this.pendingOrder[findIndex]
-      this.pendingOrder.splice(findIndex, 1)
+      const order = this.pendingOrder[findIndex];
+      this.pendingOrder.splice(findIndex, 1);
       // Update status to complete and move to complete order list
-      order.status = OrderStatus.completed
-      this.completeOrder.push(order)
+      order.status = OrderStatus.completed;
+      this.completeOrder.push(order);
 
       // Remove order remove from proccessing bot list
-      this.processingBot = this.processingBot.filter((ele) => ele.orderNo !== orderNo)
+      this.processingBot = this.processingBot.filter(
+        (ele) => ele.orderNo !== orderNo
+      );
 
       // Check pending list still have not process order
-      if (this.pendingOrder.filter((ele) => ele.orderStatus === OrderStatus.pending).length > 0) {
-        this.botProcess()
+      if (
+        this.pendingOrder.filter(
+          (ele) => ele.orderStatus === OrderStatus.pending
+        ).length > 0
+      ) {
+        this.botProcess();
       }
     },
     // Remove bot process
     botRemoveProcess() {
       // Get current processing last record
-      const lastProcessOrder = this.processingBot.slice(-1)[0]
+      const lastProcessOrder = this.processingBot.slice(-1)[0];
 
       // Remove processing timer and remove last processing record
-      clearTimeout(lastProcessOrder.timer)
-      this.processingBot.pop()
+      clearTimeout(lastProcessOrder.timer);
+      this.processingBot.pop();
 
       // Find current record in pending list and update back to pending status
       this.pendingOrder.find((ele) => {
@@ -202,21 +220,22 @@ export default {
           ele.orderStatus === OrderStatus.processing &&
           ele.orderNo === lastProcessOrder.orderNo
         ) {
-          ele.orderStatus = OrderStatus.pending
+          ele.orderStatus = OrderStatus.pending;
         }
-      })
+      });
+      this.sortPendingOrder();
     },
     sortPendingOrder() {
       // Sort pending list by processing status, order type is vip and order no in asc order
       this.pendingOrder.sort(
         (a, b) =>
-          (b.orderStatus === OrderStatus.processing) - (a.orderStatus === OrderStatus.processing) ||
-          (b.orderType === OrderType.vip) - (a.orderType === OrderType.vip) ||
-          parseInt(a.orderNo) - parseInt(b.orderNo)
-      )
-    }
-  }
-}
+          a.orderStatus === OrderStatus.processing ||
+          b.orderStatus === OrderStatus.processing ||
+          (b.orderType === OrderType.vip) - (a.orderType === OrderType.vip)
+      );
+    },
+  },
+};
 </script>
 
 <style scoped>
